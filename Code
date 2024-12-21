@@ -8,18 +8,13 @@ local function GetMaxIndex(Tbl)
     return MaxIndex
 end
 
-local function TableToString(Tbl)
-    local Result = "{"
-    local IsFirst = true
-    
+local function TableToString(Tbl, Indent)
+    Indent = Indent or ""
+    local Result = "{\n"
     local MaxIndex = GetMaxIndex(Tbl)
     
     for I = 1, MaxIndex do
-        if not IsFirst then
-            Result = Result .. ", "
-        end
-        
-        Result = Result .. "[" .. I .. "] = "
+        Result = Result .. Indent .. "    [" .. I .. "] = "
         
         local Value = Tbl[I]
         if Value == nil then
@@ -28,7 +23,7 @@ local function TableToString(Tbl)
             if typeof(Value) == "Enum" then
                 Result = Result .. "Enum." .. tostring(Value)
             else
-                Result = Result .. TableToString(Value)
+                Result = Result .. TableToString(Value, Indent .. "    ")
             end
         elseif type(Value) == "string" then
             Result = Result .. '"' .. Value .. '"'
@@ -45,14 +40,12 @@ local function TableToString(Tbl)
             Result = Result .. tostring(Value)
         end
         
-        IsFirst = false
+        Result = Result .. ",\n"
     end
     
     for Index, Value in pairs(Tbl) do
         if type(Index) ~= "number" or Index > MaxIndex then
-            if not IsFirst then
-                Result = Result .. ", "
-            end
+            Result = Result .. Indent .. "    "
             
             if type(Index) == "number" then
                 Result = Result .. "[" .. Index .. "] = "
@@ -61,7 +54,7 @@ local function TableToString(Tbl)
             end
             
             if type(Value) == "table" then
-                Result = Result .. TableToString(Value)
+                Result = Result .. TableToString(Value, Indent .. "    ")
             elseif type(Value) == "string" then
                 Result = Result .. '"' .. Value .. '"'
             elseif type(Value) == "boolean" then
@@ -70,9 +63,9 @@ local function TableToString(Tbl)
                 Result = Result .. tostring(Value)
             end
             
-            IsFirst = false
+            Result = Result .. ",\n"
         end
     end
     
-    return Result .. "}"
+    return Result .. Indent .. "}"
 end
