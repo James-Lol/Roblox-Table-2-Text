@@ -1,0 +1,89 @@
+local function GetMaxIndex(Tbl)
+    local MaxIndex = 0
+    for Index in pairs(Tbl) do
+        if type(Index) == "number" and Index > MaxIndex then
+            MaxIndex = Index
+        end
+    end
+    return MaxIndex
+end
+
+local function TableToString(Tbl)
+    local Result = "{"
+    local IsFirst = true
+    
+    local MaxIndex = GetMaxIndex(Tbl)
+    
+    for I = 1, MaxIndex do
+        if not IsFirst then
+            Result = Result .. ", "
+        end
+        
+        Result = Result .. "[" .. I .. "] = "
+        
+        local Value = Tbl[I]
+        if Value == nil then
+            Result = Result .. "nil"
+        elseif type(Value) == "table" then
+            if typeof(Value) == "Enum" then
+                Result = Result .. "Enum." .. tostring(Value)
+            else
+                Result = Result .. TableToString(Value)
+            end
+        elseif type(Value) == "string" then
+            Result = Result .. '"' .. Value .. '"'
+        elseif type(Value) == "boolean" then
+            Result = Result .. tostring(Value)
+        elseif typeof(Value) == "Instance" then
+            local Path = Value:GetFullName()
+            Result = Result .. Path
+        elseif typeof(Value) == "EnumItem" then
+            local EnumType = tostring(Value.EnumType)
+            local EnumName = tostring(Value.Name)
+            Result = Result .. "Enum." .. EnumType .. "." .. EnumName
+        else
+            Result = Result .. tostring(Value)
+        end
+        
+        IsFirst = false
+    end
+    
+    for Index, Value in pairs(Tbl) do
+        if type(Index) ~= "number" or Index > MaxIndex then
+            if not IsFirst then
+                Result = Result .. ", "
+            end
+            
+            if type(Index) == "number" then
+                Result = Result .. "[" .. Index .. "] = "
+            else
+                Result = Result .. "[\"" .. tostring(Index) .. "\"] = "
+            end
+            
+            if type(Value) == "table" then
+                if typeof(Value) == "Enum" then
+                    Result = Result .. "Enum." .. tostring(Value)
+                else
+                    Result = Result .. TableToString(Value)
+                end
+            elseif type(Value) == "string" then
+                Result = Result .. '"' .. Value .. '"'
+            elseif type(Value) == "boolean" then
+                Result = Result .. tostring(Value)
+            elseif typeof(Value) == "Instance" then
+                local Path = Value:GetFullName()
+                Result = Result .. Path
+            elseif typeof(Value) == "EnumItem" then
+                local EnumType = tostring(Value.EnumType)
+                local EnumName = tostring(Value.Name)
+                Result = Result .. "Enum." .. EnumType .. "." .. EnumName
+            else
+                Result = Result .. tostring(Value)
+            end
+            
+            IsFirst = false
+        end
+    end
+    
+    return Result .. "}"
+end
