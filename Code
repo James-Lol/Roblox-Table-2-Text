@@ -61,22 +61,11 @@ local function TableToString(Tbl)
             end
             
             if type(Value) == "table" then
-                if typeof(Value) == "Enum" then
-                    Result = Result .. "Enum." .. tostring(Value)
-                else
-                    Result = Result .. TableToString(Value)
-                end
+                Result = Result .. TableToString(Value)
             elseif type(Value) == "string" then
                 Result = Result .. '"' .. Value .. '"'
             elseif type(Value) == "boolean" then
                 Result = Result .. tostring(Value)
-            elseif typeof(Value) == "Instance" then
-                local Path = Value:GetFullName()
-                Result = Result .. Path
-            elseif typeof(Value) == "EnumItem" then
-                local EnumType = tostring(Value.EnumType)
-                local EnumName = tostring(Value.Name)
-                Result = Result .. "Enum." .. EnumType .. "." .. EnumName
             else
                 Result = Result .. tostring(Value)
             end
