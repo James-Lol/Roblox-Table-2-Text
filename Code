@@ -8,6 +8,83 @@ local function GetMaxIndex(Tbl)
     return MaxIndex
 end
 
+local function FormatVector(Vector)
+    return string.format("Vector%d.new(%s)", 
+        #Vector:components(), 
+        table.concat({Vector:components()}, ", "))
+end
+
+local function FormatColor3(Color)
+    return string.format("Color3.new(%g, %g, %g)", 
+        Color.R, 
+        Color.G, 
+        Color.B)
+end
+
+local function FormatUDim(UDim)
+    return string.format("UDim.new(%g, %g)", 
+        UDim.Scale, 
+        UDim.Offset)
+end
+
+local function FormatUDim2(UDim2)
+    return string.format("UDim2.new(%g, %g, %g, %g)",
+        UDim2.X.Scale,
+        UDim2.X.Offset,
+        UDim2.Y.Scale,
+        UDim2.Y.Offset)
+end
+
+local function FormatCFrame(CF)
+    return string.format("CFrame.new(%s)", 
+        table.concat({CF:components()}, ", "))
+end
+
+local function FormatRect(Rect)
+    return string.format("Rect.new(%g, %g, %g, %g)",
+        Rect.Min.X,
+        Rect.Min.Y,
+        Rect.Max.X,
+        Rect.Max.Y)
+end
+
+local function FormatColorSequence(Sequence)
+    local Keypoints = Sequence.Keypoints
+    local FormattedPoints = {}
+    
+    for _, Point in ipairs(Keypoints) do
+        table.insert(FormattedPoints, 
+            string.format("ColorSequenceKeypoint.new(%g, %s)",
+                Point.Time,
+                FormatColor3(Point.Value)))
+    end
+    
+    return string.format("ColorSequence.new({%s})",
+        table.concat(FormattedPoints, ", "))
+end
+
+local function FormatNumberSequence(Sequence)
+    local Keypoints = Sequence.Keypoints
+    local FormattedPoints = {}
+    
+    for _, Point in ipairs(Keypoints) do
+        table.insert(FormattedPoints,
+            string.format("NumberSequenceKeypoint.new(%g, %g, %g)",
+                Point.Time,
+                Point.Value,
+                Point.Envelope or 0))
+    end
+    
+    return string.format("NumberSequence.new({%s})",
+        table.concat(FormattedPoints, ", "))
+end
+
+local function FormatNumberRange(Range)
+    return string.format("NumberRange.new(%g, %g)",
+        Range.Min,
+        Range.Max)
+end
+
 local function TableToString(Tbl, Indent)
     Indent = Indent or ""
     local Result = "{\n"
@@ -36,6 +113,26 @@ local function TableToString(Tbl, Indent)
             local EnumType = tostring(Value.EnumType)
             local EnumName = tostring(Value.Name)
             Result = Result .. "Enum." .. EnumType .. "." .. EnumName
+        elseif typeof(Value) == "Vector2" or typeof(Value) == "Vector3" then
+            Result = Result .. FormatVector(Value)
+        elseif typeof(Value) == "Color3" then
+            Result = Result .. FormatColor3(Value)
+        elseif typeof(Value) == "BrickColor" then
+            Result = Result .. string.format('BrickColor.new("%s")', Value.Name)
+        elseif typeof(Value) == "UDim" then
+            Result = Result .. FormatUDim(Value)
+        elseif typeof(Value) == "UDim2" then
+            Result = Result .. FormatUDim2(Value)
+        elseif typeof(Value) == "CFrame" then
+            Result = Result .. FormatCFrame(Value)
+        elseif typeof(Value) == "Rect" then
+            Result = Result .. FormatRect(Value)
+        elseif typeof(Value) == "ColorSequence" then
+            Result = Result .. FormatColorSequence(Value)
+        elseif typeof(Value) == "NumberSequence" then
+            Result = Result .. FormatNumberSequence(Value)
+        elseif typeof(Value) == "NumberRange" then
+            Result = Result .. FormatNumberRange(Value)
         else
             Result = Result .. tostring(Value)
         end
@@ -54,11 +151,42 @@ local function TableToString(Tbl, Indent)
             end
             
             if type(Value) == "table" then
-                Result = Result .. TableToString(Value, Indent .. "    ")
+                if typeof(Value) == "Enum" then
+                    Result = Result .. "Enum." .. tostring(Value)
+                else
+                    Result = Result .. TableToString(Value, Indent .. "    ")
+                end
             elseif type(Value) == "string" then
                 Result = Result .. '"' .. Value .. '"'
             elseif type(Value) == "boolean" then
                 Result = Result .. tostring(Value)
+            elseif typeof(Value) == "Instance" then
+                local Path = Value:GetFullName()
+                Result = Result .. Path
+            elseif typeof(Value) == "EnumItem" then
+                local EnumType = tostring(Value.EnumType)
+                local EnumName = tostring(Value.Name)
+                Result = Result .. "Enum." .. EnumType .. "." .. EnumName
+            elseif typeof(Value) == "Vector2" or typeof(Value) == "Vector3" then
+                Result = Result .. FormatVector(Value)
+            elseif typeof(Value) == "Color3" then
+                Result = Result .. FormatColor3(Value)
+            elseif typeof(Value) == "BrickColor" then
+                Result = Result .. string.format('BrickColor.new("%s")', Value.Name)
+            elseif typeof(Value) == "UDim" then
+                Result = Result .. FormatUDim(Value)
+            elseif typeof(Value) == "UDim2" then
+                Result = Result .. FormatUDim2(Value)
+            elseif typeof(Value) == "CFrame" then
+                Result = Result .. FormatCFrame(Value)
+            elseif typeof(Value) == "Rect" then
+                Result = Result .. FormatRect(Value)
+            elseif typeof(Value) == "ColorSequence" then
+                Result = Result .. FormatColorSequence(Value)
+            elseif typeof(Value) == "NumberSequence" then
+                Result = Result .. FormatNumberSequence(Value)
+            elseif typeof(Value) == "NumberRange" then
+                Result = Result .. FormatNumberRange(Value)
             else
                 Result = Result .. tostring(Value)
             end
