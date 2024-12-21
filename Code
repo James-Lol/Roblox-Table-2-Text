@@ -15,6 +15,9 @@ local function FormatVector(Vector)
 end
 
 local function FormatColor3(Color)
+    if typeof(Color) ~= "Color3" then
+        Color = type(Color) == "string" and Color3.fromHex(Color) or Color3.new(Color)
+    end
     return string.format("Color3.new(%g, %g, %g)", 
         Color.R, 
         Color.G, 
